@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time Chess</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-border: rgba(148, 163, 184, 0.18);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --light-square: #f0d9b5;
+      --dark-square: #b58863;
+      --selected: rgba(96, 165, 250, 0.7);
+      --last-move: rgba(250, 204, 21, 0.55);
+      --legal-dot: rgba(15, 23, 42, 0.28);
+      --button: #2563eb;
+      --button-hover: #1d4ed8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1e293b, var(--bg));
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    #app {
+      width: min(92vw, 820px);
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--panel-border);
+      border-radius: 22px;
+      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.5);
+      padding: 24px 20px 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 2vw, 2.2rem);
+      letter-spacing: 0.03em;
+    }
+
+    #connectBtn {
+      border: none;
+      background: var(--button);
+      color: white;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    #connectBtn:hover {
+      background: var(--button-hover);
+    }
+
+    .board-shell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #board-wrap {
+      display: inline-grid;
+      grid-template-columns: 20px repeat(8, 56px);
+      grid-template-rows: 20px repeat(8, 56px);
+      gap: 0;
+      background: #1f2937;
+      padding: 8px 12px 12px 8px;
+      border-radius: 14px;
+    }
+
+    .coord {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    #board {
+      grid-column: 2 / 10;
+      grid-row: 2 / 10;
+      display: grid;
+      grid-template-columns: repeat(8, 56px);
+      grid-template-rows: repeat(8, 56px);
+      border: 2px solid #1f2937;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .square {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+
+    .square:hover {
+      transform: scale(1.02);
+    }
+
+    .light { background: var(--light-square); }
+    .dark { background: var(--dark-square); }
+
+    .square.selected {
+      box-shadow: inset 0 0 0 4px var(--selected);
+    }
+
+    .square.last-move {
+      box-shadow: inset 0 0 0 4px var(--last-move);
+    }
+
+    .square.legal::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--legal-dot);
+      opacity: 0.9;
+    }
+
+    #status {
+      margin-top: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.98rem;
+    }
+
+    @media (max-width: 640px) {
+      #app { padding: 16px 12px 14px; }
+      #board-wrap {
+        grid-template-columns: 18px repeat(8, 42px);
+        grid-template-rows: 18px repeat(8, 42px);
+      }
+      #board {
+        grid-template-columns: repeat(8, 42px);
+        grid-template-rows: repeat(8, 42px);
+      }
+      .square {
+        width: 42px;
+        height: 42px;
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="topbar">
+      <h1>Real-Time Chess</h1>
+      <button id="connectBtn">Connect</button>
+    </div>
+
+    <div class="board-shell">
+      <div id="board-wrap">
+        <!-- Top File Labels (a-h) -->
+        <div></div>
+        <div class="coord">a</div>
+        <div class="coord">b</div>
+        <div class="coord">c</div>
+        <div class="coord">d</div>
+        <div class="coord">e</div>
+        <div class="coord">f</div>
+        <div class="coord">g</div>
+        <div class="coord">h</div>
+
+        <!-- Left Rank Labels (8-1) & Board -->
+        <div class="coord">8</div>
+        <div id="board" aria-label="Chess board"></div>
+        <div class="coord">7</div>
+        <div class="coord">6</div>
+        <div class="coord">5</div>
+        <div class="coord">4</div>
+        <div class="coord">3</div>
+        <div class="coord">2</div>
+        <div class="coord">1</div>
+      </div>
+    </div>
+
+    <div id="status">Status: <span id="status-text">Disconnected</span></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="{% static 'app.js' %}"></script>
+</body>
+</html>

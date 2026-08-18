@@ -1,0 +1,7 @@
+# Employee Management System - Requirements
+
+# External libraries
+
+matplotlib>=3.7.0
+tkcalendar>=1.6.1
+Pillow>=9.0.0

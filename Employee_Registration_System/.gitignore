@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# VSCode settings
+.vscode/
+
+# Backups
+backups/
+
+# OS files
+.DS_Store
+Thumbs.db
